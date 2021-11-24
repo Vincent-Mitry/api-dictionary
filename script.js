@@ -21,17 +21,23 @@ document.querySelector('#form').addEventListener('submit', (e) => {
             /*****************************************************************
             * Display the definitions list in DOM
             *****************************************************************/
-            const definitionUlElement = document.querySelector('#definition-list');
+            const definitionDivElement = document.querySelector('#definition-list');
             // On vide la liste des définitions
-            emptyElement(definitionUlElement);
+            emptyElement(definitionDivElement);
             // On insère chaque définition dans la liste de puces (#definition-list) en créant un 'li' pour chaque élément
             for (const meaning of meanings) {
-                let definitionLiElement = document.createElement('li');
-                definitionLiElement.innerHTML = meaning.definitions[0].definition;
-                definitionUlElement.append(definitionLiElement);
+                console.log(meaning.partOfSpeech);
+                let definitionPElement = document.createElement('p');
+                let partOfSpeechSpanElement = document.createElement('span');
+                partOfSpeechSpanElement.className = "fst-italic";
+
+                partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
+                definitionPElement.innerHTML = meaning.definitions[0].definition;
+
+                definitionPElement.prepend(partOfSpeechSpanElement);
+                definitionDivElement.append(definitionPElement);
             }
         }))
-    
 })
 
 /**
