@@ -5,54 +5,47 @@ document.querySelector('#form').addEventListener('submit', (e) => {
     fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
         .then(Response => Response.json()
         .then(Json => {
-            console.log(Response);
-            console.log(Json);
+            // console.log(Response);
+            // console.log(Json);
             if(!Response.ok){
-                console.log(Json.title + Json.message);
-                const errorTitle = Json.title;
-                const errorMessage = Json.message;
-
-                document.querySelector('#word-data').innerHTML = errorTitle;
-                const errorMessagePElement = document.createElement('p').innerHTML = errorMessage;
-                document.querySelector('#definition-list').append(errorMessagePElement);
-
+                throw Json;
             }
-            /*****************************************************************
-            * Data from Json Object
-            *****************************************************************/
-            const word = Json[0].word;
-            const meanings = Json[0]['meanings'];
-
-            console.log(meanings[0]);
-            /*****************************************************************
-            * Display the word title in DOM
-            *****************************************************************/
-            document.querySelector('#word-data').innerHTML = word;
             
-            /*****************************************************************
-            * Display the definitions list in DOM
-            *****************************************************************/
-            const definitionDivElement = document.querySelector('#definition-list');
-            // On vide la liste des définitions
-            emptyElement(definitionDivElement);
-            // On insère chaque définition dans la liste de puces (#definition-list) en créant un 'li' pour chaque élément
-            for (const meaning of meanings) {
-                console.log(meaning.partOfSpeech);
-                let definitionPElement = document.createElement('p');
-                let partOfSpeechSpanElement = document.createElement('span');
-                partOfSpeechSpanElement.className = "fst-italic";
-
-                partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
-                definitionPElement.innerHTML = meaning.definitions[0].definition;
-
-                definitionPElement.prepend(partOfSpeechSpanElement);
-                definitionDivElement.append(definitionPElement);
-            }
+            displayWordInfo(Json);
         }))
         .catch(error => {
-            console.log(error);
+            displayErrors(error);
         })
 })
+
+function displayWordInfo(data){
+    /*****************************************************************
+    * Data from Json Object
+    *****************************************************************/
+     const word = data[0].word;
+     const meanings = data[0]['meanings'];
+     /*****************************************************************
+     * Display the word title in DOM
+     *****************************************************************/
+     document.querySelector('#word-data').innerHTML = word;
+     /*****************************************************************
+     * Display the definitions list in DOM
+     *****************************************************************/
+     const definitionDivElement = document.querySelector('#definition-list');
+     // On vide la liste des définitions
+     emptyElement(definitionDivElement);
+     // On insère chaque définition dans la div '#definition-list' (on créé un élément 'p' pour chaque définition) 
+     for (const meaning of meanings) {
+         const definitionPElement = document.createElement('p');
+         definitionPElement.innerHTML = meaning.definitions[0].definition;
+         definitionDivElement.append(definitionPElement);
+         
+         const partOfSpeechSpanElement = document.createElement('span');
+         partOfSpeechSpanElement.className = "fst-italic";
+         partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
+         definitionPElement.prepend(partOfSpeechSpanElement);
+     }
+}
 
 /**
  * Empties a DOM element
@@ -63,6 +56,23 @@ function emptyElement(element) {
        element.firstElementChild.remove();
     }
   }
+
+  /**
+   * Display Errors in DOM
+   * @param {*} data 
+   */
+function displayErrors(data) {
+    const errorTitle = data.title;
+    const errorMessage = data.message;
+
+    const definitionDivElement = document.querySelector('#definition-list');
+    emptyElement(definitionDivElement);
+
+    document.querySelector('#word-data').innerHTML = errorTitle;
+    const errorMessagePElement = document.createElement('p');
+    errorMessagePElement.innerHTML = errorMessage;
+    definitionDivElement.append(errorMessagePElement);
+}
 
 
   
