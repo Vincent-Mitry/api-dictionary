@@ -5,7 +5,18 @@ document.querySelector('#form').addEventListener('submit', (e) => {
     fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
         .then(Response => Response.json()
         .then(Json => {
+            console.log(Response);
             console.log(Json);
+            if(!Response.ok){
+                console.log(Json.title + Json.message);
+                const errorTitle = Json.title;
+                const errorMessage = Json.message;
+
+                document.querySelector('#word-data').innerHTML = errorTitle;
+                const errorMessagePElement = document.createElement('p').innerHTML = errorMessage;
+                document.querySelector('#definition-list').append(errorMessagePElement);
+
+            }
             /*****************************************************************
             * Data from Json Object
             *****************************************************************/
@@ -38,6 +49,9 @@ document.querySelector('#form').addEventListener('submit', (e) => {
                 definitionDivElement.append(definitionPElement);
             }
         }))
+        .catch(error => {
+            console.log(error);
+        })
 })
 
 /**
@@ -49,4 +63,6 @@ function emptyElement(element) {
        element.firstElementChild.remove();
     }
   }
+
+
   
