@@ -1,78 +1,80 @@
-document.querySelector('#form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const wordToSearch = document.querySelector('#word').value;
+const inputWordElement = document.querySelector('#word');
+const definitionDivElement = document.querySelector('#definition-data');
+
+function fetchData() {
+
+    const wordToSearch = inputWordElement.value;
 
     fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
-        .then(Response => Response.json()
-        .then(Json => {
-            // console.log(Response);
-            // console.log(Json);
-            if(!Response.ok){
-                throw Json;
-            }
-            
-            displayWordInfo(Json);
-        }))
-        .catch(error => {
-            displayErrors(error);
-        })
-})
+    .then(Response => Response.json()
+    .then(Json => {
+        if(!Response.ok){
+            throw Json;
+        }
+        
+        displayWordInfo(Json);
+    }))
+    .catch(error => {
+        displayErrors(error);
+    })
+}
+
 
 function displayWordInfo(data){
+    const word = data[0].word;
+    const meanings = data[0]['meanings'];
     /*****************************************************************
-    * Data from Json Object
-    *****************************************************************/
-     const word = data[0].word;
-     const meanings = data[0]['meanings'];
-     /*****************************************************************
      * Display the word title in DOM
      *****************************************************************/
-     document.querySelector('#word-data').innerHTML = word;
-     /*****************************************************************
+    document.querySelector('#word-data').innerHTML = word;
+    /*****************************************************************
      * Display the definitions list in DOM
      *****************************************************************/
-     const definitionDivElement = document.querySelector('#definition-list');
-     // On vide la liste des définitions
-     emptyElement(definitionDivElement);
-     // On insère chaque définition dans la div '#definition-list' (on créé un élément 'p' pour chaque définition) 
-     for (const meaning of meanings) {
-         const definitionPElement = document.createElement('p');
-         definitionPElement.innerHTML = meaning.definitions[0].definition;
-         definitionDivElement.append(definitionPElement);
-         
-         const partOfSpeechSpanElement = document.createElement('span');
-         partOfSpeechSpanElement.className = "fst-italic";
-         partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
-         definitionPElement.prepend(partOfSpeechSpanElement);
-     }
+    emptyDataElement();
+    // On insère chaque définition dans la div '#definition-list' (on créé un élément 'p' pour chaque définition) 
+    for (const meaning of meanings) {
+        const definitionPElement = document.createElement('p');
+        definitionPElement.innerHTML = meaning.definitions[0].definition;
+        definitionDivElement.append(definitionPElement);
+        
+        const partOfSpeechSpanElement = document.createElement('span');
+        partOfSpeechSpanElement.className = "fst-italic";
+        partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
+        definitionPElement.prepend(partOfSpeechSpanElement);
+    }
 }
 
 /**
- * Empties a DOM element
- * @param {*} element 
+ * Empties data from definitionDivElement
  */
-function emptyElement(element) {
-    while(element.firstElementChild) {
-       element.firstElementChild.remove();
+function emptyDataElement() {
+    while(definitionDivElement.firstElementChild) {
+        definitionDivElement.firstElementChild.remove();
     }
-  }
+}
 
-  /**
-   * Display Errors in DOM
-   * @param {*} data 
-   */
+/**
+ * Display Errors in DOM
+ * @param {*} data 
+ */
 function displayErrors(data) {
     const errorTitle = data.title;
     const errorMessage = data.message;
-
-    const definitionDivElement = document.querySelector('#definition-list');
-    emptyElement(definitionDivElement);
-
+    
+    emptyDataElement();
+    
     document.querySelector('#word-data').innerHTML = errorTitle;
     const errorMessagePElement = document.createElement('p');
     errorMessagePElement.innerHTML = errorMessage;
     definitionDivElement.append(errorMessagePElement);
 }
 
+document.querySelector('#form').addEventListener('submit', (e) => {
+    if(inputWordElement.value !== ""){
+        e.preventDefault();
+        fetchData();
+    } else {
+        e.preventDefault();
+    }
+})
 
-  
