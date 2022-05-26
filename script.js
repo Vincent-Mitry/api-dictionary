@@ -5,7 +5,7 @@ const definitionDivElement = document.querySelector('#definition-data');
 function fetchData() {
     const wordToSearch = inputWordElement.value;
 
-    if(wordToSearch.length > 0){
+    if(wordToSearch.length > 0) {
         fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
         .then(Response => Response.json()
         .then(Json => {
@@ -21,9 +21,9 @@ function fetchData() {
     }
 }
 
-function displayWordInfo(data){
+function displayWordInfo(data) {
     const word = data[0].word;
-    const meanings = data[0]['meanings'];
+    const meaningsList = data[0]['meanings'];
     /*****************************************************************
      * Display the word title in DOM
      *****************************************************************/
@@ -32,21 +32,22 @@ function displayWordInfo(data){
      * Display the definitions list in DOM
      *****************************************************************/
     emptyDataElement();
-    // On insère chaque définition dans la div '#definition-list' (on créé un élément 'p' pour chaque définition) 
-    for (const meaning of meanings) {
+    // On insère chaque définition dans la div '#definition-list' (on créé une  élément 'p' pour chaque définition) 
+    for (const meaning of meaningsList) {
+
         const cardDiv = document.createElement('div');
         cardDiv.className = "card bg-secondary p-2 mb-1";
         definitionDivElement.append(cardDiv);
+        
+        const partOfSpeechPElement = document.createElement('p');
+        partOfSpeechPElement.className = "fst-italic text-dark mb-0";
+        partOfSpeechPElement.innerHTML = meaning.partOfSpeech;
+        cardDiv.append(partOfSpeechPElement);
 
         const definitionPElement = document.createElement('p');
-        definitionPElement.innerHTML = meaning.definitions[0].definition;
         definitionPElement.className = "m-0";
+        definitionPElement.innerHTML = meaning.definitions[0].definition;
         cardDiv.append(definitionPElement);
-        
-        const partOfSpeechSpanElement = document.createElement('span');
-        partOfSpeechSpanElement.className = "fst-italic";
-        partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
-        definitionPElement.prepend(partOfSpeechSpanElement);
     }
 }
 
