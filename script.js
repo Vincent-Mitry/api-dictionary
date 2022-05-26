@@ -1,57 +1,92 @@
-const displayDataList = document.getElementById('data-list');
-const wordTitle = document.getElementById('word-title');
-let wordData = [];
+const inputWordElement = document.querySelector('#word');
+const wordTitle = document.querySelector('#word-data');
+const definitionDivElement = document.querySelector('#definition-data');
 
-async function fetchData(wordToSearch) {
-    await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
-    .then(Response => Response.json())
-    .then(Json => wordData = Json[0]);
+function fetchData() {
+    const wordToSearch = inputWordElement.value;
+
+    if(wordToSearch.length > 0){
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToSearch}`)
+        .then(Response => Response.json()
+        .then(Json => {
+            if(!Response.ok){
+                throw Json;
+            }
+            
+            displayWordInfo(Json);
+        }))
+        .catch(error => {
+                displayErrors(error);
+        })
+    }
 }
 
-function displayWordInfo(){
-    if(wordData !== undefined){
-        wordTitle.innerHTML = wordData.word;
-    
-        emptyDataList();
-        
-        for (const meaning of wordData.meanings) {
-            const definition = meaning.definitions[0].definition;
-            const partOfSpeech = meaning.partOfSpeech;
-            
-            const definitionPElement = document.createElement('p');
-            const partOfSpeechSpanElement = document.createElement('span');
-    
-            definitionPElement.innerHTML = definition;
-            partOfSpeechSpanElement.innerHTML = partOfSpeech + '<br>';
-    
-            partOfSpeechSpanElement.className = "fst-italic";
-    
-            definitionPElement.prepend(partOfSpeechSpanElement);
-            displayDataList.append(definitionPElement);
-        }
-    } else {
-        emptyDataList();
+function displayWordInfo(data){
+    const word = data[0].word;
+    const meanings = data[0]['meanings'];
+    /*****************************************************************
+     * Display the word title in DOM
+     *****************************************************************/
+    wordTitle.innerHTML = word;
+    /*****************************************************************
+     * Display the definitions list in DOM
+     *****************************************************************/
+    emptyDataElement();
+    // On insère chaque définition dans la div '#definition-list' (on créé un élément 'p' pour chaque définition) 
+    for (const meaning of meanings) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = "card bg-secondary p-2 mb-1";
+        definitionDivElement.append(cardDiv);
 
-        wordTitle.innerHTML = "No definitions found";
-        displayDataList.innerHTML = "<p>Sorry pal, we couldn't find definitions for the word you were looking for.</p>"
+        const definitionPElement = document.createElement('p');
+        definitionPElement.innerHTML = meaning.definitions[0].definition;
+        definitionPElement.className = "m-0";
+        cardDiv.append(definitionPElement);
+        
+        const partOfSpeechSpanElement = document.createElement('span');
+        partOfSpeechSpanElement.className = "fst-italic";
+        partOfSpeechSpanElement.innerHTML = meaning.partOfSpeech + "<br>";
+        definitionPElement.prepend(partOfSpeechSpanElement);
     }
-};
+}
 
 /**
- * Empties data from #data-list in DOM
+ * Empties data from definitionDivElement
  */
-function emptyDataList() {
-    while(displayDataList.firstElementChild) {
-        displayDataList.firstElementChild.remove();
+function emptyDataElement() {
+    while(definitionDivElement.firstElementChild) {
+        definitionDivElement.firstElementChild.remove();
     }
 }
 
-document.querySelector('#word').addEventListener('input', (e) => {
-    fetchData(e.target.value);
-})
+/**
+ * Display Errors in DOM
+ * @param {*} data 
+ */
+function displayErrors(data) {
+    let errorTitle;
+    let errorMessage;
+
+    if(typeof(data.title) !== 'undefined'){
+        errorTitle = data.title;
+        errorMessage = data.message;
+    } else {
+        errorTitle = "An error has occured";
+        errorMessage = `Oups! Something went wrong... Please try again later or contact the support.<br>
+                        Error message: <span  class="fst-italic">"${data}"</span>`;
+    }
+    
+    emptyDataElement();
+    
+    wordTitle.innerHTML = errorTitle;
+
+    const errorMessagePElement = document.createElement('p');
+    errorMessagePElement.innerHTML = errorMessage;
+    errorMessagePElement.className = "m-0";
+    definitionDivElement.append(errorMessagePElement);
+}
 
 document.querySelector('#form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    displayWordInfo();
+        e.preventDefault();
+        fetchData();
 })
-
