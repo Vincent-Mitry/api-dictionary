@@ -16,23 +16,19 @@ function fetchData() {
             displayWordInfo(Json);
         }))
         .catch(error => {
-                displayErrors(error);
+            displayErrors(error);
         })
     }
 }
 
 function displayWordInfo(data) {
+    emptyDataElement();
+
     const word = data[0].word;
     const meaningsList = data[0]['meanings'];
-    /*****************************************************************
-     * Display the word title in DOM
-     *****************************************************************/
+
     wordTitle.innerHTML = word;
-    /*****************************************************************
-     * Display the definitions list in DOM
-     *****************************************************************/
-    emptyDataElement();
-    // On insère chaque définition dans la div '#definition-list' (on créé une  élément 'p' pour chaque définition) 
+ 
     for (const meaning of meaningsList) {
 
         const cardDiv = document.createElement('div');
@@ -88,6 +84,6 @@ function displayErrors(data) {
 }
 
 document.querySelector('#form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        fetchData();
+    e.preventDefault();
+    fetchData();
 })
